@@ -6,15 +6,30 @@ from django.contrib.auth import get_user_model    #Хотим использов
 User = get_user_model()    #Хотим использовать пользователя обозначенного в настройках django
 
 
+class LatestProductManager:
 
-#1catgory
-#2product
-#3cartproduct
-#4cart
-#5order
+    @staticmethod
+    def get_products_for_mainpage(self, *args, **kwargs):     #функция получить все товары для отображения на главной странице
+        for_respect = kwargs.get('for_respect')
+        products = []
+        ct_models = ContentType.objects.filter(model__in=args)     #Фильтруем модели в аргументах
+        for ct_model in ct_models:                                 #Итерируемся по моделям
+            model_products = ct_model.model_class()._base_manager.all().order_by('-id')[:5]     #Берем все объекты из родительскиго класса
+            products.append(model_products)
+            '''for_respect принимает параметр той категории,которую нужно отобразить первой '''
+        if for_respect:
+            ct_model = ContentType.objects.filter(model=for_respect)
+            if ct_model.exists():
+                if for_respect in args:
+                    return sorted(
+                        products, key=lambda x: x.__class__._meta.model_name.startswith(for_respect), reverse=True     #!!!!!!!
+                    )
+        return products
 
-#6 customer
-#7 Specification
+
+class LatestProduct:
+
+    object = LatestProductManager()
 
 
 class Category(models.Model):
@@ -96,5 +111,10 @@ class Hookah(Product):
 
     def __str__(self):
         return '{} : {}'.format(self.category.name, self.title)
+
+
+
+
+
 
 
