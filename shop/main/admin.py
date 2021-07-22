@@ -2,26 +2,33 @@ from django.contrib import admin
 from .models import *
 from django import forms
 from django.forms import ModelForm, ValidationError
+from django.utils.safestring import mark_safe      #позволяет добавить в строку python Тэг html
 
 from PIL import Image
 
 
 class TobaccoAdminForm(ModelForm):
 
-    MIN_RESOLUTION = (4000, 4000)
     '''Текст помощник'''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['product_image'].help_text = 'Загружайте изображение с минимальным разрешением {} x {}'.format(
-            *self.MIN_RESOLUTION
+        self.fields['product_image'].help_text = mark_safe(
+            '<span style="color:red;">Загружайте изображение с минимальным разрешением {} x {}</span>'.format(
+                *Product.MIN_RESOLUTION
+            )
         )
     '''Функция для проверки разрешения изображения'''
     def clean_product_image(self):
         image = self.cleaned_data['product_image']
         img = Image.open(image)
-        min_width, min_height = self.MIN_RESOLUTION
+        min_width, min_height = Product.MIN_RESOLUTION
+        max_width, max_height = Product.MAX_RESOLUTION
+        if image.size > Product.MAX_IMAGE_SIZE:     #ограничение загрузки изображения размером больше 3 МБ
+            raise ValidationError('Размер изображения слишком большой')
         if img.height < min_height or img.width < min_width:
             raise ValidationError('Загруженное изображение меньше минимального')
+        if img.height > max_height or img.width > max_width:
+            raise ValidationError('Загруженное изображение больше минимального')
         return image
 
 

@@ -1,9 +1,19 @@
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+from PIL import Image
 
 from django.contrib.auth import get_user_model    #Хотим использовать пользователя обозначенного в настройках django
 User = get_user_model()    #Хотим использовать пользователя обозначенного в настройках django
+
+
+class MinResolutionErrorException(Exception):    #кастомная ошибка для минимального разрешения
+    pass
+
+
+class MaxResolutionErrorException(Exception):    #кастомная ошибка для максимального разрешения
+    pass
+
 
 
 class LatestProductManager:
@@ -42,6 +52,9 @@ class Category(models.Model):
 
 
 class Product(models.Model):
+    MIN_RESOLUTION = (400, 400)
+    MAX_RESOLUTION = (1200, 1200)
+    MAX_IMAGE_SIZE = 3145728
 
     class Meta:
         abstract = True
@@ -55,6 +68,19 @@ class Product(models.Model):
 
     def __str__(self):    #Возвращаем для представления в Админке
         return self.title
+
+    '''Проверяем изображение при сохранении'''
+    def save(self, *args, **kwargs):
+
+        image = self.product_image
+        img= Image.open(image)
+        min_width, min_height = self.MIN_RESOLUTION
+        max_width, max_height = self.MAX_RESOLUTION
+        if img.height < min_height or img.width < min_width:
+            raise MinResolutionErrorException('Загруженное изображение меньше минимального')
+        if img.height > max_height or img.width > max_width:
+            raise MaxResolutionErrorException('Загруженное изображение больше минимального')
+        return image
 
 
 class CartProduct(models.Model):
