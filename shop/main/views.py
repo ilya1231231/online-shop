@@ -13,16 +13,17 @@ class ProductDetailView(DetailView):
         'hookah': Hookah
     }
 
+    '''Забираем модель из запроса,чтобы получить определенную модель '''
     def dispatch(self, request, *args, **kwargs):
-        self.model = self.CT_MODEL_MODEL_CLASS[kwargs['ct_model']]
+        self.model = self.CT_MODEL_MODEL_CLASS[kwargs['ct_model']]    #Имя модели передается через словарь для формирования URL
         self.queryset = self.model._base_manager.all()
         return super().dispatch(request, *args, **kwargs)
 
     # model = Model
     # queryset = Model.objects.all()
-    context_object_name = 'product'
-    template_name = 'main/product_detail.html'
-    slug_url_kwarg = 'slug'
+    context_object_name = 'product'     #просто контекстное имя
+    template_name = 'main/product_detail.html'    #обязательно путь до папки,если шаблон не находится в templates
+    slug_url_kwarg = 'slug'    #Для использования слага
 
 
 

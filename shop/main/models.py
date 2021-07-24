@@ -11,10 +11,10 @@ from django.urls import reverse
 
 User = get_user_model()    #Хотим использовать пользователя обозначенного в настройках django
 
-
+'''Делаем url для каждого отдельного продукта'''
 def get_product_url(obj, viewname):
-    ct_model = obj.__class__._meta.model_name
-    return reverse(viewname, kwargs={'ct_model': ct_model, 'slug': obj.slug})
+    ct_model = obj.__class__._meta.model_name       #передаем имя модели через атрибут 'meta' в ct_model
+    return reverse(viewname, kwargs={'ct_model': ct_model, 'slug': obj.slug})    #передаем в кварги имя и слаг объекта
 
 
 
@@ -158,7 +158,7 @@ class Tobacco(Product):
         return '{} : {}'.format(self.category.name, self.title)
 
     def get_absolute_url(self):
-        return get_product_url(self, 'product_detail')
+        return get_product_url(self, 'product_detail')    #передает результат функции и передаем viewname из той функции
 
 class Hookah(Product):
     high = models.CharField(max_length=255, verbose_name='Длина шахты')
