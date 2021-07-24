@@ -1,17 +1,29 @@
+import sys
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from PIL import Image
-
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.contrib.auth import get_user_model    #Хотим использовать пользователя обозначенного в настройках django
+from django.urls import reverse
+
+
 User = get_user_model()    #Хотим использовать пользователя обозначенного в настройках django
 
 
-class MinResolutionErrorException(Exception):    #кастомная ошибка для минимального разрешения
+def get_product_url(obj, viewname):
+    ct_model = obj.__class__._meta.model_name
+    return reverse(viewname, kwargs={'ct_model': ct_model, 'slug': obj.slug})
+
+
+
+
+class MinResolutionErrorException(Exception):     #кастомная ошибка для минимального разрешения
     pass
 
 
-class MaxResolutionErrorException(Exception):    #кастомная ошибка для максимального разрешения
+class MaxResolutionErrorException(Exception):     #кастомная ошибка для максимального разрешения
     pass
 
 
@@ -69,18 +81,33 @@ class Product(models.Model):
     def __str__(self):    #Возвращаем для представления в Админке
         return self.title
 
-    '''Проверяем изображение при сохранении'''
+
     def save(self, *args, **kwargs):
 
+        '''Проверяем изображение при сохранении'''
         image = self.product_image
-        img= Image.open(image)
+        img = Image.open(image)
         min_width, min_height = self.MIN_RESOLUTION
         max_width, max_height = self.MAX_RESOLUTION
         if img.height < min_height or img.width < min_width:
             raise MinResolutionErrorException('Загруженное изображение меньше минимального')
         if img.height > max_height or img.width > max_width:
             raise MaxResolutionErrorException('Загруженное изображение больше минимального')
-        return image
+
+        '''При сохранении принудительное изменение разрешения изображения, применяемого на сайте'''
+        image = self.product_image
+        img = Image.open(image)
+        new_img = img.convert('RGB')     #!!!!!!!!!!!!
+        resized_new_img = new_img.resize((200, 200), Image.ANTIALIAS)
+        filestream = BytesIO()
+        resized_new_img.save(filestream, 'JPEG', quality=90)
+        filestream.seek(0)
+        name = '{}.{}'.format(*self.product_image.name.split('.'))     #допускаются файлы с определенным именем
+        self.product_image = InMemoryUploadedFile(
+            filestream, 'ImageField', name, 'jpeg/image', sys.getsizeof(filestream), None
+        )
+
+        super().save(*args, **kwargs)         #!!!!!!!!!!!!!!
 
 
 class CartProduct(models.Model):
@@ -130,6 +157,9 @@ class Tobacco(Product):
     def __str__(self):
         return '{} : {}'.format(self.category.name, self.title)
 
+    def get_absolute_url(self):
+        return get_product_url(self, 'product_detail')
+
 class Hookah(Product):
     high = models.CharField(max_length=255, verbose_name='Длина шахты')
     in_material = models.CharField(max_length=255, verbose_name='Материал шахты')
@@ -138,6 +168,9 @@ class Hookah(Product):
 
     def __str__(self):
         return '{} : {}'.format(self.category.name, self.title)
+
+    def get_absolute_url(self):
+        return get_product_url(self, 'product_detail')
 
 
 

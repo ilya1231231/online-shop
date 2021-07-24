@@ -13,8 +13,34 @@ class TobaccoAdminForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['product_image'].help_text = mark_safe(
-            '<span style="color:red;">Загружайте изображение с минимальным разрешением {} x {}</span>'.format(
-                *Product.MIN_RESOLUTION
+            '<span style="color:red;">При загрузке изображения с разрешением больше {} x {} ,оно будет обрезано  </span>'.format(
+                *Product.MAX_RESOLUTION
+            )
+        )
+    '''Функция для проверки разрешения изображения'''
+    def clean_product_image(self):
+        image = self.cleaned_data['product_image']
+        img = Image.open(image)
+        min_width, min_height = Product.MIN_RESOLUTION
+        max_width, max_height = Product.MAX_RESOLUTION
+        if image.size > Product.MAX_IMAGE_SIZE:     #ограничение загрузки изображения размером больше 3 МБ
+            raise ValidationError('Размер изображения слишком большой')
+        if img.height < min_height or img.width < min_width:
+            raise ValidationError('Загруженное изображение меньше минимального')
+        if img.height > max_height or img.width > max_width:
+            raise ValidationError('Загруженное изображение больше минимального')
+        return image
+
+
+
+class HookahAdminForm(ModelForm):
+
+    '''Текст помощник'''
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['product_image'].help_text = mark_safe(
+            '<span style="color:red;">При загрузке изображения с разрешением больше {} x {} ,оно будет обрезано  </span>'.format(
+                *Product.MAX_RESOLUTION
             )
         )
     '''Функция для проверки разрешения изображения'''
