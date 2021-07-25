@@ -95,17 +95,17 @@ class Product(models.Model):
             raise MaxResolutionErrorException('Загруженное изображение больше минимального')
 
         '''При сохранении принудительное изменение разрешения изображения, применяемого на сайте'''
-        image = self.product_image
-        img = Image.open(image)
-        new_img = img.convert('RGB')     #!!!!!!!!!!!!
-        resized_new_img = new_img.resize((200, 200), Image.ANTIALIAS)
-        filestream = BytesIO()
-        resized_new_img.save(filestream, 'JPEG', quality=90)
-        filestream.seek(0)
-        name = '{}.{}'.format(*self.product_image.name.split('.'))     #допускаются файлы с определенным именем
-        self.product_image = InMemoryUploadedFile(
-            filestream, 'ImageField', name, 'jpeg/image', sys.getsizeof(filestream), None
-        )
+        # image = self.product_image
+        # img = Image.open(image)
+        # new_img = img.convert('RGB')     #!!!!!!!!!!!!
+        # resized_new_img = new_img.resize((200, 200), Image.ANTIALIAS)
+        # filestream = BytesIO()
+        # resized_new_img.save(filestream, 'JPEG', quality=90)
+        # filestream.seek(0)
+        # name = '{}.{}'.format(*self.product_image.name.split('.'))     #допускаются файлы с определенным именем
+        # self.product_image = InMemoryUploadedFile(
+        #     filestream, 'ImageField', name, 'jpeg/image', sys.getsizeof(filestream), None
+        # )
 
         super().save(*args, **kwargs)         #!!!!!!!!!!!!!!
 
