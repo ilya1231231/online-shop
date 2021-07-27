@@ -1,11 +1,11 @@
 {% extends 'main/base.html' %}
-
+{% load specifications %}
 
 {% block content %}
 <nav aria-label="breadcrumb" class="mt-2">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="{% url 'test' %}">Home</a></li>
-    <li class="breadcrumb-item"><a href="#">{{ product.category.name}}</a></li>
+    <li class="breadcrumb-item"><a href="#">{{ product.category.name }}</a></li>
     <li class="breadcrumb-item active" aria-current="page">Data</li>
   </ol>
 </nav>
@@ -35,10 +35,12 @@
             </div>
         </section>
         <p class="mt-0">Характеристики:<p/>
-        {% if product.category.slug == 'hookahs' %}
-            {% include 'main/hookah_specification.html' %}
-        {% else %}
-            {% include 'main/tobacco_specification.html' %}
-        {% endif %}
+
+        {{ product|product_spec }}
+<!--        {% if product.category.slug == 'hookahs' %}-->
+<!--            {% include 'main/hookah_specification.html' %}-->
+<!--        {% else %}-->
+<!--            {% include 'main/tobacco_specification.html' %}-->
+<!--        {% endif %}-->
 {% endblock %}
 
