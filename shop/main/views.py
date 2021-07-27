@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from django.views.generic import DetailView
-from .models import Tobacco, Hookah
+from .models import Tobacco, Hookah, Category
 
 # Create your views here.
 def test_view(request):
-    return render(request, 'main/base.html')
+    categories = Category.objects.get_categories_for_up_sidebar()
+    return render(request, 'main/base.html', {'categories': categories})
 
 
 class ProductDetailView(DetailView):
@@ -26,5 +27,11 @@ class ProductDetailView(DetailView):
     slug_url_kwarg = 'slug'    #Для использования слага
 
 
+class CategoryDetailView(DetailView):
 
+    model = Category
+    queryset = Category.objects.all()
+    context_object_name = 'category'
+    template_name = 'main/category_detail.html'
+    slug_url_kwarg = 'slug'
 

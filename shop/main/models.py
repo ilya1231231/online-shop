@@ -8,6 +8,30 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.contrib.auth import get_user_model    #Хотим использовать пользователя обозначенного в настройках django
 from django.urls import reverse
 
+def get_models_for_count(*model_names):    #!!!!!!!!!!!
+    return [models.Count(model_name) for model_name in model_names]
+
+'''Менеджер для поседующего отображения категорий и товаров, имеющихся в ней'''
+class CategoryManager(models.Manager):
+
+    CATEGORY_NAME_COUNT_NAME = {
+        'Табаки': 'tobacco__count',
+        'Кальяны': 'hookah__count'
+    }
+
+    def get_queryset(self):
+        return super().get_queryset()
+
+    def get_categories_for_up_sidebar(self):    #!!!!!!!!!!!!!!!!
+        models = get_models_for_count('tobacco', 'hookah')
+        qs = list(self.get_queryset().annotate(*models))   #Искольная функция
+        data = [
+            dict(name=c.name, url=c.get_absolute_url(), count=getattr(c, self.CATEGORY_NAME_COUNT_NAME[c.name]))
+            for c in qs
+        ]
+        return data
+
+
 
 User = get_user_model()    #Хотим использовать пользователя обозначенного в настройках django
 
@@ -58,6 +82,10 @@ class LatestProduct:
 class Category(models.Model):
     name = models.CharField(max_length=255, verbose_name='Имя категории')
     slug = models.SlugField(unique=True)     #Уникальный Url для отдельной категории
+    objects = CategoryManager()
+
+    def get_absolute_url(self):
+        return reverse('category_detail', kwargs={'slug': self.slug})
 
     def __str__(self):    #Возвращаем для представления в Админке
         return self.name
@@ -173,7 +201,6 @@ class Hookah(Product):
 
     def get_absolute_url(self):
         return get_product_url(self, 'product_detail')
-
 
 
 
