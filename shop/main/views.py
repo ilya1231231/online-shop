@@ -1,14 +1,19 @@
 from django.shortcuts import render
 from django.views.generic import DetailView, View
-from .models import Tobacco, Hookah, Category
+from .models import Tobacco, Hookah, Category, LatestProduct
 from .mixins import CategoryDetailMixin     #импорт миксина!!!
 
 
-class BaseView(CategoryDetailMixin, View):
+class BaseView(View):
 
     def get(self, request, *args, **kwargs):
         categories = Category.objects.get_categories_for_up_sidebar()
-        return render(request, 'main/base.html', {'categories': categories})
+        products = LatestProduct.object.get_products_for_mainpage('hookah', 'tobacco')
+        context = {
+            'categories': categories,
+            'products': products
+        }
+        return render(request, 'main/base.html', context)
 
 
 

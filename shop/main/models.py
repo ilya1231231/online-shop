@@ -55,13 +55,13 @@ class MaxResolutionErrorException(Exception):     #кастомная ошибк
 class LatestProductManager:
 
     @staticmethod
-    def get_products_for_mainpage(self, *args, **kwargs):     #функция получить все товары для отображения на главной странице
+    def get_products_for_mainpage(*args, **kwargs):     #функция получить все товары для отображения на главной странице
         for_respect = kwargs.get('for_respect')
         products = []
         ct_models = ContentType.objects.filter(model__in=args)     #Фильтруем модели в аргументах
         for ct_model in ct_models:                                 #Итерируемся по моделям
             model_products = ct_model.model_class()._base_manager.all().order_by('-id')[:5]     #Берем все объекты из родительскиго класса
-            products.append(model_products)
+            products.extend(model_products)
             '''for_respect принимает параметр той категории,которую нужно отобразить первой '''
         if for_respect:
             ct_model = ContentType.objects.filter(model=for_respect)
