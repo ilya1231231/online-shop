@@ -1,14 +1,19 @@
 from django.shortcuts import render
-from django.views.generic import DetailView
+from django.views.generic import DetailView, View
 from .models import Tobacco, Hookah, Category
-
-# Create your views here.
-def test_view(request):
-    categories = Category.objects.get_categories_for_up_sidebar()
-    return render(request, 'main/base.html', {'categories': categories})
+from .mixins import CategoryDetailMixin     #импорт миксина!!!
 
 
-class ProductDetailView(DetailView):
+class BaseView(CategoryDetailMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        categories = Category.objects.get_categories_for_up_sidebar()
+        return render(request, 'main/base.html', {'categories': categories})
+
+
+
+
+class ProductDetailView(CategoryDetailMixin, DetailView):
     CT_MODEL_MODEL_CLASS = {
         'tobacco': Tobacco,
         'hookah': Hookah
@@ -27,7 +32,7 @@ class ProductDetailView(DetailView):
     slug_url_kwarg = 'slug'    #Для использования слага
 
 
-class CategoryDetailView(DetailView):
+class CategoryDetailView(CategoryDetailMixin, DetailView):
 
     model = Category
     queryset = Category.objects.all()
