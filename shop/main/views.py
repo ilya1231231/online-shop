@@ -3,27 +3,28 @@ from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
 from django.views.generic import DetailView, View
 from .models import Tobacco, Hookah, Category, LatestProduct, Customer, Cart, CartProduct
-from .mixins import CategoryDetailMixin     #импорт миксина!!!
+from .mixins import CategoryDetailMixin, CartMixin    #импорт миксина!!!
 
 
-class BaseView(View):
+class BaseView(CartMixin, View):
 
     def get(self, request, *args, **kwargs):
-        customer = Customer.objects.get(user=request.user)
-        cart = Cart.objects.get(owner=customer)
+        '''Поля реализованы в Миксине'''
+        # customer = Customer.objects.get(user=request.user)
+        # cart = Cart.objects.get(owner=customer)
         categories = Category.objects.get_categories_for_up_sidebar()
         products = LatestProduct.object.get_products_for_mainpage('hookah', 'tobacco')
         context = {
             'categories': categories,
             'products': products,
-            'cart': cart
+            'cart': self.cart
         }
         return render(request, 'main/base.html', context)
 
 
 
 
-class ProductDetailView(CategoryDetailMixin, DetailView):
+class ProductDetailView(CartMixin, CategoryDetailMixin, DetailView):
     CT_MODEL_MODEL_CLASS = {
         'tobacco': Tobacco,
         'hookah': Hookah
@@ -49,7 +50,7 @@ class ProductDetailView(CategoryDetailMixin, DetailView):
         return context
 
 
-class CategoryDetailView(CategoryDetailMixin, DetailView):
+class CategoryDetailView(CartMixin, CategoryDetailMixin, DetailView):
 
     model = Category
     queryset = Category.objects.all()
@@ -58,20 +59,21 @@ class CategoryDetailView(CategoryDetailMixin, DetailView):
     slug_url_kwarg = 'slug'
 
 
-class AddToCartView(View):
+class AddToCartView(CartMixin, View):
 
     def get(self, request, *args, **kwargs):
         ct_model, product_slug = kwargs.get('ct_model'), kwargs.get('slug')     #берем нужные значения
-        customer = Customer.objects.get(user= request.user)     #берем покупателя
-        cart = Cart.objects.get(owner = customer, in_order = False)     #берем корзину
+        '''Поля реализованы в Миксине'''
+        # customer = Customer.objects.get(user= request.user)     #берем покупателя
+        #cart = Cart.objects.get(owner = customer, in_order = False)     #берем корзину
         content_type = ContentType.objects.get(model=ct_model)      #берем модель нашего товара
         product = content_type.model_class().objects.get(slug=product_slug)     #получаем продукт у объекта Content_type через родительский класс,обращаеся через менеджер находя продукт по слагу
         ''' создаем новый cart_product объект с набором аргументов'''
         cart_product, created = CartProduct.objects.get_or_create(
-            user=cart.owner, cart=cart, content_type=content_type, object_id=product.id
+            user=self.cart.owner, cart=self.cart, content_type=content_type, object_id=product.id
         )
         if created:
-            cart.products.add(cart_product)
+            self.cart.products.add(cart_product)
 
         print(kwargs.get('ct_model'))
         print(kwargs.get('slug'))
@@ -82,14 +84,15 @@ class AddToCartView(View):
 
 
 
-class CartView(View):
+class CartView(CartMixin, View):
 
     def get(self, request, *args, **kwargs):
-        customer = Customer.objects.get(user=request.user)
-        cart = Cart.objects.get(owner=customer)
+        '''Поля реализованы в Миксине'''
+        # customer = Customer.objects.get(user=request.user)
+        # cart = Cart.objects.get(owner=customer)
         categories = Category.objects.get_categories_for_up_sidebar()
         context = {
-            'cart': cart,
+            'cart': self.cart,
             'categories': categories
         }
         return render(request, 'main/cart.html', context)
