@@ -1,6 +1,7 @@
 {% extends 'main/base.html' %}
 
 {% block content %}
+<h3 class="text-center mt-6 mb-5">Ваша корзина {% if not cart.products.count %} пуста {% endif %}</h3>
 <table class="table">
   <thead>
     <tr>

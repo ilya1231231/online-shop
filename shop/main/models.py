@@ -142,7 +142,7 @@ class CartProduct(models.Model):
 
     user = models.ForeignKey('Customer', verbose_name='Покупатель', on_delete=models.CASCADE)     #Внешний ключ на пользователя(кастомера)
     cart = models.ForeignKey('Cart', verbose_name='Корзина', on_delete=models.CASCADE, related_name='related_products')     #Внешний ключ на корзину
-    content_type= models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = (GenericForeignKey('content_type', 'object_id'))
     #product = models.ForeignKey(Product, verbose_name='Продукт', on_delete=models.CASCADE)     #Внешний ключ на продукт
@@ -152,6 +152,10 @@ class CartProduct(models.Model):
 
     def __str__(self):
         return 'Продукт: {} (для корзины)'.format(self.content_object.title)    #!!!
+
+    def save(self,*args, **kwargs):     #Для решения проблемы,при изменении атрибутов модели
+        self.total_price = self.count *self.product.price
+        super().save(*args, **kwargs)
 
 
 class Cart(models.Model):
