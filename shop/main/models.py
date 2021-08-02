@@ -154,7 +154,7 @@ class CartProduct(models.Model):
         return 'Продукт: {} (для корзины)'.format(self.content_object.title)    #!!!
 
     def save(self,*args, **kwargs):     #Для решения проблемы,при изменении атрибутов модели
-        self.total_price = self.count *self.product.price
+        self.total_price = self.count * self.content_object.price
         super().save(*args, **kwargs)
 
 
@@ -169,6 +169,18 @@ class Cart(models.Model):
 
     def __str__(self):
         return str(self.id)     #!!!
+
+    def save(self, *args, **kwargs):
+        '''Обращаемся к продуктам,находящимся в этой корзине и считаем общую сумму и кол-во товара по id '''
+        cart_data = self.products.aggregate(models.Sum('total_price'), models.Count('id'))      #aggreagte sql function
+        print(cart_data)
+        '''Передаем переменные в агрументы'''
+        if cart_data.get('total_price__sum'):
+            self.total_price = cart_data['total_price__sum']
+        else:
+            self.total_price = 0
+        self.total_products = cart_data['id__count']
+        super().save(*args, **kwargs)
 
 
 class Customer(models.Model):

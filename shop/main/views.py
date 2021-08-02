@@ -74,6 +74,7 @@ class AddToCartView(CartMixin, View):
         )
         if created:
             self.cart.products.add(cart_product)
+        self.cart.save()    #информация обновляется при добавлении товара в корзину
 
         print(kwargs.get('ct_model'))
         print(kwargs.get('slug'))
