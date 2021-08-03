@@ -3,7 +3,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
 from django.views.generic import DetailView, View
 from .models import Tobacco, Hookah, Category, LatestProduct, Customer, Cart, CartProduct
-from .mixins import CategoryDetailMixin, CartMixin    #импорт миксина!!!
+from .mixins import CategoryDetailMixin, CartMixin    #импорт миксина
+from django.contrib import messages
 
 
 class BaseView(CartMixin, View):
@@ -75,6 +76,7 @@ class AddToCartView(CartMixin, View):
         if created:
             self.cart.products.add(cart_product)
         self.cart.save()    #информация обновляется при добавлении товара в корзину
+        messages.add_message(request, messages.INFO, 'Товар успешно добавлен в корзину')
 
         return HttpResponseRedirect('/cart/')
 
@@ -90,7 +92,27 @@ class DeleteFromCartView(CartMixin, View):
             user=self.cart.owner, cart=self.cart, content_type=content_type, object_id=product.id
         )
         self.cart.products.remove(cart_product)
+        cart_product.delete()
         self.cart.save()
+        messages.add_message(request, messages.INFO, 'Товар успешно удален из корзины')
+        return HttpResponseRedirect('/cart/')
+
+class ChangeCountView(CartMixin, View):
+
+    def post(self, request, *args, **kwargs):
+        ct_model, product_slug = kwargs.get('ct_model'), kwargs.get('slug')
+        content_type = ContentType.objects.get(model=ct_model)
+        product = content_type.model_class().objects.get(slug=product_slug)
+        cart_product = CartProduct.objects.get(
+            user=self.cart.owner, cart=self.cart, content_type=content_type, object_id=product.id
+        )
+        '''присваиваем значение, которое приходит из тела запроса'''
+        qty = int(request.POST.get('qty'))
+        cart_product.count = qty
+        cart_product.save()
+        self.cart.save()
+        messages.add_message(request, messages.INFO, 'Количество товара успешно изменено')
+        #print(request.POST)
         return HttpResponseRedirect('/cart/')
 
 
