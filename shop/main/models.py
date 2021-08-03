@@ -109,7 +109,6 @@ class Product(models.Model):
     def __str__(self):    #Возвращаем для представления в Админке
         return self.title
 
-
     def save(self, *args, **kwargs):
 
         '''Проверяем изображение при сохранении'''
@@ -136,6 +135,9 @@ class Product(models.Model):
         # )
 
         super().save(*args, **kwargs)         #!!!!!!!!!!!!!!
+
+    def get_model_name(self):
+        return self.__class__.__name__.lower()
 
 
 class CartProduct(models.Model):
@@ -206,6 +208,9 @@ class Tobacco(Product):
     def get_absolute_url(self):
         return get_product_url(self, 'product_detail')    #передает результат функции и передаем viewname из той функции
 
+
+
+
 class Hookah(Product):
     high = models.CharField(max_length=255, verbose_name='Длина шахты')
     in_material = models.CharField(max_length=255, verbose_name='Материал шахты')
@@ -217,6 +222,8 @@ class Hookah(Product):
 
     def get_absolute_url(self):
         return get_product_url(self, 'product_detail')
+
+
 
 
 
