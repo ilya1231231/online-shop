@@ -4,9 +4,9 @@
 {% block content %}
 <nav aria-label="breadcrumb" class="mt-2">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'test' %}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'test' %}">Главная</a></li>
     <li class="breadcrumb-item"><a href="#">{{ product.category.name }}</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Data</li>
+    <li class="breadcrumb-item active" aria-current="page">{{ product.title }}</li>
   </ol>
 </nav>
         <!-- Product section-->

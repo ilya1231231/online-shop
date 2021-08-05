@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
 from django.views.generic import DetailView, View
-from .models import Tobacco, Hookah, Category, LatestProduct, Customer, Cart, CartProduct
+from .models import Tobacco, Hookah, Category, LatestProduct, CartProduct
 from .mixins import CategoryDetailMixin, CartMixin    #импорт миксина
 from django.contrib import messages
 
@@ -48,6 +48,7 @@ class ProductDetailView(CartMixin, CategoryDetailMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ct_model'] = self.model._meta.model_name
+        context['cart'] = self.cart
         return context
 
 
@@ -58,6 +59,13 @@ class CategoryDetailView(CartMixin, CategoryDetailMixin, DetailView):
     context_object_name = 'category'
     template_name = 'main/category_detail.html'
     slug_url_kwarg = 'slug'
+
+    '''Добавляем информацию о конкретной модели в класс(строковое представление)'''
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cart'] = self.cart
+        return context
 
 
 class AddToCartView(CartMixin, View):
