@@ -274,7 +274,7 @@ class Order(models.Model):
     )
     comment = models.TextField(verbose_name='Комментарий к заказу', null=True, blank=True)
     created_time = models.DateTimeField(auto_now=True, verbose_name='Дата создания заказа')
-    oreder_date = models.DateTimeField(verbose_name='Дата поучения заказа',default=timezone.now)
+    order_date = models.DateTimeField(verbose_name='Дата поучения заказа',default=timezone.now)
 
     def __str__(self):
         return str(self.id)

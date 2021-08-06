@@ -5,6 +5,7 @@ from django.views.generic import DetailView, View
 from .models import Tobacco, Hookah, Category, LatestProduct, CartProduct
 from .mixins import CategoryDetailMixin, CartMixin    #импорт миксина
 from django.contrib import messages
+from .forms import OrderForm
 
 
 class BaseView(CartMixin, View):
@@ -139,6 +140,22 @@ class CartView(CartMixin, View):
             'categories': categories
         }
         return render(request, 'main/cart.html', context)
+
+
+class CheckoutView(CartMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        '''Поля реализованы в Миксине'''
+        # customer = Customer.objects.get(user=request.user)
+        # cart = Cart.objects.get(owner=customer)
+        categories = Category.objects.get_categories_for_up_sidebar()
+        form = OrderForm(request.POST or None)
+        context = {
+            'cart': self.cart,
+            'categories': categories,
+            'form': form
+        }
+        return render(request, 'main/checkout.html', context)
 
 
 
