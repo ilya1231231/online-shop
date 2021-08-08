@@ -173,17 +173,17 @@ class Cart(models.Model):
     def __str__(self):
         return str(self.id)     #!!!
 
-    def save(self, *args, **kwargs):
-        '''Обращаемся к продуктам,находящимся в этой корзине и считаем общую сумму и кол-во товара по id '''
-        cart_data = self.products.aggregate(models.Sum('total_price'), models.Count('id'))      #aggreagte sql function
-        print(cart_data)
-        '''Передаем переменные в агрументы'''
-        if cart_data.get('total_price__sum'):
-            self.total_price = cart_data['total_price__sum']
-        else:
-            self.total_price = 0
-        self.total_products = cart_data['id__count']
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     '''Обращаемся к продуктам,находящимся в этой корзине и считаем общую сумму и кол-во товара по id '''
+    #     cart_data = self.products.aggregate(models.Sum('total_price'), models.Count('id'))      #aggreagte sql function
+    #     print(cart_data)
+    #     '''Передаем переменные в агрументы'''
+    #     if cart_data.get('total_price__sum'):
+    #         self.total_price = cart_data['total_price__sum']
+    #     else:
+    #         self.total_price = 0
+    #     self.total_products = cart_data['id__count']
+    #     super().save(*args, **kwargs)
 
 
 class Customer(models.Model):
@@ -260,6 +260,7 @@ class Order(models.Model):
     last_name = models.CharField(max_length=255, verbose_name='Фамилия покупателя')
     phone = models.CharField(max_length=30, verbose_name='Номер телефона')
     address = models.CharField(max_length=1024, verbose_name='Адрес покупателя')
+    cart = models.ForeignKey(Cart, verbose_name='Корзина',null=True, blank=True, on_delete=models.CASCADE)
     status = models.CharField(
         max_length=100,
         verbose_name='Статус заказа',

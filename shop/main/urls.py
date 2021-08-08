@@ -6,7 +6,8 @@ from .views import (BaseView,
                     AddToCartView,
                     DeleteFromCartView,
                     ChangeCountView,
-                    CheckoutView
+                    CheckoutView,
+                    MakeOrderView
                     )
 from django.urls import path
 
@@ -19,7 +20,9 @@ urlpatterns = [
     path('add_to_cart/<str:ct_model>/<str:slug>/', AddToCartView.as_view(), name='add_to_cart'),
     path('delete_from_cart/<str:ct_model>/<str:slug>/', DeleteFromCartView.as_view(), name='delete_from_cart'),
     path('change_count/<str:ct_model>/<str:slug>/', ChangeCountView.as_view(), name='change_count'),
-    path('checkout/', CheckoutView.as_view(), name='checkout')
+    path('checkout/', CheckoutView.as_view(), name='checkout'),
+    path('make_order/', MakeOrderView.as_view(), name='make_order')
+
 ]
 
 '''ct_model и slug из функции get_absolute_url, name -это viewname, которое мы передавали в функцию GAU моделей
