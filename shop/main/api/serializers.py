@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Category, Tobacco
+from ..models import Category, Tobacco, Hookah
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -24,6 +24,7 @@ class BaseProductSerializer:
 
 
 class TobaccoSerializer(BaseProductSerializer, serializers.ModelSerializer):
+
     taste = serializers.CharField(required=True)
     strength = serializers.CharField(required=True)
     structure = serializers.CharField(required=True)
@@ -33,3 +34,14 @@ class TobaccoSerializer(BaseProductSerializer, serializers.ModelSerializer):
         model = Tobacco
         fields = '__all__'
 
+
+class HookahSerializer(BaseProductSerializer, serializers.ModelSerializer):
+
+    high = serializers.CharField(required=True)
+    in_material = serializers.CharField(required=True)
+    out_material = serializers.CharField(required=True)
+    pull = serializers.CharField(required=True)
+
+    class Meta:
+        model = Hookah
+        fields = '__all__'
